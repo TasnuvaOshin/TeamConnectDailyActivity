@@ -14,6 +14,8 @@ class Session {
   final String team;
   final String portfolio;
   final bool isDemo;
+  final bool isSupervisor;
+  final String supId;
 
   const Session({
     required this.userId,
@@ -24,17 +26,19 @@ class Session {
     required this.team,
     required this.portfolio,
     this.isDemo = false,
+    this.isSupervisor = false,
+    this.supId = '',
   });
 
   factory Session.fromProfileDatum(ProfileDatum d) => Session(
-        userId: d.id,
-        empId: d.empId,
-        name: d.empName,
-        designation: d.empDesignation,
-        location: d.location,
-        team: d.team,
-        portfolio: d.portfolio,
-      );
+    userId: d.id,
+    empId: d.empId,
+    name: d.empName,
+    designation: d.empDesignation,
+    location: d.location,
+    team: d.team,
+    portfolio: d.portfolio,
+  );
 }
 
 class SessionStore {

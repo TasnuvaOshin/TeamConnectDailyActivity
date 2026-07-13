@@ -57,20 +57,18 @@ class Employee {
   });
 
   factory Employee.fromJson(Map<String, dynamic> json) => Employee(
-    id: _s(json['id']),
-    empId: _s(json['emp_id']),
-    name: _s(json['emp_name']),
-    designation: _s(json['emp_designation']),
-    portfolio: _s(json['portfolio']),
-    team: _s(json['team']),
-    location: _s(json['location']),
-  );
+        id: _s(json['id']),
+        empId: _s(json['emp_id']),
+        name: _s(json['emp_name']),
+        designation: _s(json['emp_designation']),
+        portfolio: _s(json['portfolio']),
+        team: _s(json['team']),
+        location: _s(json['location']),
+      );
 
   String get initials {
-    final parts = name
-        .split(RegExp(r'\s+'))
-        .where((part) => part.isNotEmpty)
-        .toList();
+    final parts =
+        name.split(RegExp(r'\s+')).where((part) => part.isNotEmpty).toList();
     if (parts.isEmpty) return '?';
     if (parts.length == 1) return parts.first[0].toUpperCase();
     return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
@@ -95,9 +93,9 @@ class RatingOverview {
       supervisor: SupervisorInfo.fromJson(_map(json['supervisor'])),
       filter: RatingFilter.fromJson(_map(json['filter'])),
       summary: RatingSummary.fromJson(_map(json['summary'])),
-      employees: _list(
-        json['employees'],
-      ).map((item) => EmployeeOverview.fromJson(_map(item))).toList(),
+      employees: _list(json['employees'])
+          .map((item) => EmployeeOverview.fromJson(_map(item)))
+          .toList(),
     );
   }
 }
@@ -114,10 +112,10 @@ class SupervisorInfo {
   });
 
   factory SupervisorInfo.fromJson(Map<String, dynamic> json) => SupervisorInfo(
-    empId: _s(json['emp_id']),
-    name: _s(json['emp_name']),
-    designation: _s(json['emp_designation']),
-  );
+        empId: _s(json['emp_id']),
+        name: _s(json['emp_name']),
+        designation: _s(json['emp_designation']),
+      );
 }
 
 class RatingFilter {
@@ -134,11 +132,11 @@ class RatingFilter {
   });
 
   factory RatingFilter.fromJson(Map<String, dynamic> json) => RatingFilter(
-    month: _s(json['month']),
-    year: _s(json['year']),
-    fromDate: _s(json['f_date']),
-    toDate: _s(json['t_date']),
-  );
+        month: _s(json['month']),
+        year: _s(json['year']),
+        fromDate: _s(json['f_date']),
+        toDate: _s(json['t_date']),
+      );
 }
 
 class RatingSummary {
@@ -165,16 +163,16 @@ class RatingSummary {
   });
 
   factory RatingSummary.fromJson(Map<String, dynamic> json) => RatingSummary(
-    totalEmployees: _i(json['total_employees']),
-    rated: _i(json['rated']),
-    notRated: _i(json['not_rated']),
-    ratedByMe: _i(json['rated_by_me']),
-    teamAverage: _d(json['team_avg_rating']),
-    totalTask: _i(json['total_task']),
-    totalTaskDone: _i(json['total_task_done']),
-    totalTour: _i(json['total_tour']),
-    agendaSubmitted: _i(json['agenda_submitted']),
-  );
+        totalEmployees: _i(json['total_employees']),
+        rated: _i(json['rated']),
+        notRated: _i(json['not_rated']),
+        ratedByMe: _i(json['rated_by_me']),
+        teamAverage: _d(json['team_avg_rating']),
+        totalTask: _i(json['total_task']),
+        totalTaskDone: _i(json['total_task_done']),
+        totalTour: _i(json['total_tour']),
+        agendaSubmitted: _i(json['agenda_submitted']),
+      );
 
   double get taskCompletion => totalTask == 0
       ? 0
@@ -268,8 +266,7 @@ class ActivitySummary {
     required this.lastActivity,
   });
 
-  factory ActivitySummary.fromJson(Map<String, dynamic> json) =>
-      ActivitySummary(
+  factory ActivitySummary.fromJson(Map<String, dynamic> json) => ActivitySummary(
         total: _i(json['total']),
         done: _i(json['done']),
         pending: _i(json['pending']),
@@ -295,14 +292,13 @@ class AgendaSummary {
   });
 
   factory AgendaSummary.fromJson(Map<String, dynamic> json) => AgendaSummary(
-    submitted:
-        json['submitted'] == true ||
-        _s(json['submitted']).toLowerCase() == 'true' ||
-        _s(json['submitted']) == '1',
-    total: _i(json['total']),
-    linkedTasks: _i(json['linked_tasks']),
-    linkRate: _d(json['link_rate']) ?? 0,
-  );
+        submitted: json['submitted'] == true ||
+            _s(json['submitted']).toLowerCase() == 'true' ||
+            _s(json['submitted']) == '1',
+        total: _i(json['total']),
+        linkedTasks: _i(json['linked_tasks']),
+        linkRate: _d(json['link_rate']) ?? 0,
+      );
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -311,11 +307,12 @@ class AgendaSummary {
 
 class RatingApi {
   static Future<List<Employee>> fetchUnderMySupervision(String myEmpId) async {
-    final uri = Uri.parse(
-      '$_kBase/team',
-    ).replace(queryParameters: {'id': myEmpId});
+    final uri = Uri.parse('$_kBase/team').replace(
+      queryParameters: {'id': myEmpId},
+    );
 
-    final response = await http.get(uri).timeout(const Duration(seconds: 25));
+    final response =
+        await http.get(uri).timeout(const Duration(seconds: 25));
 
     if (response.statusCode != 200) {
       throw Exception('Server error (${response.statusCode})');
@@ -323,21 +320,18 @@ class RatingApi {
 
     final body = _map(jsonDecode(response.body));
     if (_s(body['response']) != '200') {
-      throw Exception(
-        _s(body['message']).isEmpty
-            ? 'Could not load team'
-            : _s(body['message']),
-      );
+      throw Exception(_s(body['message']).isEmpty
+          ? 'Could not load team'
+          : _s(body['message']));
     }
 
-    final employees =
-        _list(body['under_my_supervison'])
-            .map((item) => Employee.fromJson(_map(item)))
-            .where((employee) => employee.empId.isNotEmpty)
-            .toList()
-          ..sort(
-            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-          );
+    final employees = _list(body['under_my_supervison'])
+        .map((item) => Employee.fromJson(_map(item)))
+        .where((employee) => employee.empId.isNotEmpty)
+        .toList()
+      ..sort(
+        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+      );
 
     return employees;
   }
@@ -347,11 +341,16 @@ class RatingApi {
     required String month,
     required String year,
   }) async {
-    final uri = Uri.parse(
-      '$_kBase/ratings',
-    ).replace(queryParameters: {'emp_id': empId, 'month': month, 'year': year});
+    final uri = Uri.parse('$_kBase/ratings').replace(
+      queryParameters: {
+        'emp_id': empId,
+        'month': month,
+        'year': year,
+      },
+    );
 
-    final response = await http.get(uri).timeout(const Duration(seconds: 25));
+    final response =
+        await http.get(uri).timeout(const Duration(seconds: 25));
 
     if (response.statusCode != 200) {
       throw Exception('Server error (${response.statusCode})');
@@ -553,7 +552,10 @@ class _RatingsScreenState extends State<RatingsScreen> {
     final saved = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => _RateDialog(employee: employee, myEmpId: _myEmpId!),
+      builder: (_) => _RateDialog(
+        employee: employee,
+        myEmpId: _myEmpId!,
+      ),
     );
 
     if (saved == true && mounted) {
@@ -590,7 +592,10 @@ class _RatingsScreenState extends State<RatingsScreen> {
                 const SizedBox(height: 3),
                 const Text(
                   'Review performance and rate employees under your supervision.',
-                  style: TextStyle(fontSize: 12, color: AppColors.mute),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.mute,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 Container(
@@ -630,7 +635,10 @@ class _RatingsScreenState extends State<RatingsScreen> {
           ),
           Expanded(
             child: TabBarView(
-              children: [_buildRateTeamTab(), _buildOverviewTab()],
+              children: [
+                _buildRateTeamTab(),
+                _buildOverviewTab(),
+              ],
             ),
           ),
         ],
@@ -848,7 +856,10 @@ class _OverviewFilter extends StatelessWidget {
               ),
               items: years
                   .map(
-                    (year) => DropdownMenuItem(value: year, child: Text(year)),
+                    (year) => DropdownMenuItem(
+                      value: year,
+                      child: Text(year),
+                    ),
                   )
                   .toList(),
               onChanged: loading ? null : onYearChanged,
@@ -864,7 +875,10 @@ class _SupervisorCard extends StatelessWidget {
   final SupervisorInfo supervisor;
   final RatingFilter filter;
 
-  const _SupervisorCard({required this.supervisor, required this.filter});
+  const _SupervisorCard({
+    required this.supervisor,
+    required this.filter,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -911,7 +925,10 @@ class _SupervisorCard extends StatelessWidget {
                   supervisor.designation,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 11, color: Colors.white70),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.white70,
+                  ),
                 ),
                 const SizedBox(height: 7),
                 Wrap(
@@ -984,13 +1001,19 @@ class _SummaryGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final columns = constraints.maxWidth >= 700 ? 3 : 2;
-        final width = (constraints.maxWidth - ((columns - 1) * 10)) / columns;
+        final width =
+            (constraints.maxWidth - ((columns - 1) * 10)) / columns;
 
         return Wrap(
           spacing: 10,
           runSpacing: 10,
           children: items
-              .map((item) => SizedBox(width: width, child: item))
+              .map(
+                (item) => SizedBox(
+                  width: width,
+                  child: item,
+                ),
+              )
               .toList(),
         );
       },
@@ -1049,12 +1072,18 @@ class _SummaryItem extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             title,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 2),
           Text(
             subtitle,
-            style: const TextStyle(fontSize: 10, color: AppColors.mute),
+            style: const TextStyle(
+              fontSize: 10,
+              color: AppColors.mute,
+            ),
           ),
         ],
       ),
@@ -1066,7 +1095,10 @@ class _OverviewEmployeeCard extends StatelessWidget {
   final EmployeeOverview item;
   final VoidCallback onRate;
 
-  const _OverviewEmployeeCard({required this.item, required this.onRate});
+  const _OverviewEmployeeCard({
+    required this.item,
+    required this.onRate,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1204,7 +1236,8 @@ class _OverviewEmployeeCard extends StatelessWidget {
                   children: [
                     for (var index = 0; index < metrics.length; index++) ...[
                       Expanded(child: metrics[index]),
-                      if (index != metrics.length - 1) const SizedBox(width: 8),
+                      if (index != metrics.length - 1)
+                        const SizedBox(width: 8),
                     ],
                   ],
                 );
@@ -1324,12 +1357,16 @@ class _RatingBadge extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
-              color: rating.isRated ? AppColors.forestDeep : AppColors.mute,
+              color:
+                  rating.isRated ? AppColors.forestDeep : AppColors.mute,
             ),
           ),
           Text(
             rating.isRated ? '${rating.totalReview} review' : 'Not rated',
-            style: const TextStyle(fontSize: 8.5, color: AppColors.mute),
+            style: const TextStyle(
+              fontSize: 8.5,
+              color: AppColors.mute,
+            ),
           ),
         ],
       ),
@@ -1367,7 +1404,10 @@ class _MetricBox extends StatelessWidget {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 1),
           Text(
@@ -1382,7 +1422,10 @@ class _MetricBox extends StatelessWidget {
             subtitle,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 8.5, color: AppColors.mute),
+            style: const TextStyle(
+              fontSize: 8.5,
+              color: AppColors.mute,
+            ),
           ),
         ],
       ),
@@ -1398,7 +1441,10 @@ class _EmployeeCard extends StatelessWidget {
   final Employee employee;
   final VoidCallback onRate;
 
-  const _EmployeeCard({required this.employee, required this.onRate});
+  const _EmployeeCard({
+    required this.employee,
+    required this.onRate,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1449,7 +1495,10 @@ class _EmployeeCard extends StatelessWidget {
                 Text(
                   employee.designation,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 11, color: AppColors.mute),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.mute,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Wrap(
@@ -1509,7 +1558,10 @@ class _RateDialog extends StatefulWidget {
   final Employee employee;
   final String myEmpId;
 
-  const _RateDialog({required this.employee, required this.myEmpId});
+  const _RateDialog({
+    required this.employee,
+    required this.myEmpId,
+  });
 
   @override
   State<_RateDialog> createState() => _RateDialogState();
@@ -1561,7 +1613,9 @@ class _RateDialogState extends State<_RateDialog> {
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(error.toString().replaceFirst('Exception: ', '')),
+          content: Text(
+            error.toString().replaceFirst('Exception: ', ''),
+          ),
           backgroundColor: AppColors.destructive,
         ),
       );
@@ -1575,7 +1629,9 @@ class _RateDialogState extends State<_RateDialog> {
     return Dialog(
       backgroundColor: AppColors.bg,
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 440),
         child: SingleChildScrollView(
@@ -1589,7 +1645,9 @@ class _RateDialogState extends State<_RateDialog> {
                   gradient: LinearGradient(
                     colors: [AppColors.forestDeep, AppColors.forest],
                   ),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -1636,7 +1694,10 @@ class _RateDialogState extends State<_RateDialog> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white70),
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.white70,
+                      ),
                       onPressed: _saving
                           ? null
                           : () => Navigator.of(context).pop(false),
@@ -1666,7 +1727,8 @@ class _RateDialogState extends State<_RateDialog> {
                     _StarField(
                       label: 'Other Task Rating',
                       value: _otherRate,
-                      onChanged: (value) => setState(() => _otherRate = value),
+                      onChanged: (value) =>
+                          setState(() => _otherRate = value),
                     ),
                     const SizedBox(height: 10),
                     TextField(
@@ -1736,7 +1798,9 @@ class _StarField extends StatelessWidget {
                 ),
               ),
               Text(
-                value == 0 ? '—' : '${value.toStringAsFixed(0)}/$_kMaxRating',
+                value == 0
+                    ? '—'
+                    : '${value.toStringAsFixed(0)}/$_kMaxRating',
                 style: display(
                   size: 15,
                   weight: FontWeight.w800,
@@ -1842,7 +1906,10 @@ class _LoadingBox extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             message,
-            style: const TextStyle(fontSize: 12, color: AppColors.mute),
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.mute,
+            ),
           ),
         ],
       ),
@@ -1876,13 +1943,19 @@ class _EmptyBox extends StatelessWidget {
           const SizedBox(height: 9),
           Text(
             title,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 11, color: AppColors.mute),
+            style: const TextStyle(
+              fontSize: 11,
+              color: AppColors.mute,
+            ),
           ),
         ],
       ),
@@ -1894,7 +1967,10 @@ class _ErrorBox extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
 
-  const _ErrorBox({required this.message, required this.onRetry});
+  const _ErrorBox({
+    required this.message,
+    required this.onRetry,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1907,15 +1983,25 @@ class _ErrorBox extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Icon(Icons.cloud_off, color: AppColors.mute, size: 28),
+          const Icon(
+            Icons.cloud_off,
+            color: AppColors.mute,
+            size: 28,
+          ),
           const SizedBox(height: 8),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 12, color: AppColors.mute),
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.mute,
+            ),
           ),
           const SizedBox(height: 12),
-          OutlinedButton(onPressed: onRetry, child: const Text('Retry')),
+          OutlinedButton(
+            onPressed: onRetry,
+            child: const Text('Retry'),
+          ),
         ],
       ),
     );

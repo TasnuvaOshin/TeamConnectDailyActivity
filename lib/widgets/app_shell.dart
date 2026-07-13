@@ -29,13 +29,14 @@ List<NavEntry> buildNav({
   if (observer) {
     return [
       const NavEntry('/dashboard', 'Home', Icons.space_dashboard_outlined),
-      const NavEntry('/team', 'Team', Icons.groups_2_outlined),
-      const NavEntry('/tasks', 'Assign', Icons.checklist_rtl),
-      const NavEntry('/reports', 'Reports', Icons.bar_chart_outlined),
+      const NavEntry('/team', 'My Employee', Icons.groups_2_outlined),
+      const NavEntry('/tasks', 'Tasks', Icons.checklist_rtl),
       const NavEntry('/agenda', 'Agenda', Icons.calendar_month_outlined),
+      const NavEntry('/reports', 'Ratings', Icons.bar_chart_outlined),
+
       if (isApiSession)
         const NavEntry('/tour-plan', 'Tour Plan', Icons.map_outlined),
-      const NavEntry('/growth', 'Growth', Icons.trending_up),
+      // const NavEntry('/growth', 'Growth', Icons.trending_up),
       const NavEntry('/profile', 'Profile', Icons.person_outline),
       if (isAdmin) const NavEntry('/admin', 'Admin', Icons.shield_outlined),
     ];

@@ -47,69 +47,82 @@ class TasksScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Row(children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('My Tasks',
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'My Tasks',
                         style: display(
-                            size: 24,
-                            weight: FontWeight.w800,
-                            color: AppColors.forestDeep)),
-                    const Text('Track your work and delegate to your team.',
-                        style:
-                            TextStyle(fontSize: 12, color: AppColors.mute)),
-                  ],
-                ),
-              ),
-              if (isApiSession) ...[
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: OutlinedButton.icon(
-                    onPressed: () => _showCompletedTasksHistoryDialog(context, ref),
-                    icon: const Icon(Icons.history, size: 16),
-                    label: const Text('History'),
+                          size: 24,
+                          weight: FontWeight.w800,
+                          color: AppColors.forestDeep,
+                        ),
+                      ),
+                      const Text(
+                        'Track your work and delegate to your team.',
+                        style: TextStyle(fontSize: 12, color: AppColors.mute),
+                      ),
+                    ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: OutlinedButton.icon(
-                    onPressed: () => _openAddTaskDialog(context, ref),
-                    icon: const Icon(Icons.add, size: 16),
-                    label: const Text('Add task'),
+                if (isApiSession) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: OutlinedButton.icon(
+                      onPressed: () =>
+                          _showCompletedTasksHistoryDialog(context, ref),
+                      icon: const Icon(Icons.history, size: 16),
+                      label: const Text('History'),
+                    ),
                   ),
-                ),
-              ] else if (session != null && session.isDemo) ...[
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: OutlinedButton.icon(
-                    onPressed: () => _openAddTaskDialog(context, ref),
-                    icon: const Icon(Icons.add, size: 16),
-                    label: const Text('Add task'),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: OutlinedButton.icon(
+                      onPressed: () => _openAddTaskDialog(context, ref),
+                      icon: const Icon(Icons.add, size: 16),
+                      label: const Text('Add task'),
+                    ),
                   ),
-                ),
+                ] else if (session != null && session.isDemo) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: OutlinedButton.icon(
+                      onPressed: () => _openAddTaskDialog(context, ref),
+                      icon: const Icon(Icons.add, size: 16),
+                      label: const Text('Add task'),
+                    ),
+                  ),
+                ],
+                // if (canAssign)
+                //   ElevatedButton.icon(
+                //     style: ElevatedButton.styleFrom(
+                //         backgroundColor: AppColors.amber),
+                //     onPressed: () => showQuickAssignDialog(context, ref),
+                //     icon: const Icon(Icons.add, size: 17),
+                //     label: const Text('Assign task'),
+                //   ),
               ],
-              if (canAssign)
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.amber),
-                  onPressed: () => showQuickAssignDialog(context, ref),
-                  icon: const Icon(Icons.add, size: 17),
-                  label: const Text('Assign task'),
-                ),
-            ]),
+            ),
             const SizedBox(height: 14),
-            if (tabs.length > 1)
-              TabBar(tabs: tabs),
+            if (tabs.length > 1) TabBar(tabs: tabs),
             const SizedBox(height: 12),
             SizedBox(
-              height: _tabHeight(inbox.length, delegated.length, isApiSession ? 5 : 0),
-              child: TabBarView(children: [
-                _InboxList(tasks: inbox, profiles: profiles),
-                if (canAssign) _DelegatedList(tasks: delegated, profiles: profiles),
-                if (isApiSession) const _ToursList(),
-              ]),
+              height: _tabHeight(
+                inbox.length,
+                delegated.length,
+                isApiSession ? 5 : 0,
+              ),
+              child: TabBarView(
+                children: [
+                  _InboxList(tasks: inbox, profiles: profiles),
+                  if (canAssign)
+                    _DelegatedList(tasks: delegated, profiles: profiles),
+                  if (isApiSession) const _ToursList(),
+                ],
+              ),
             ),
           ],
         ),
@@ -126,7 +139,10 @@ class TasksScreen extends ConsumerWidget {
   }
 
   /// Task History Dialog (task/complete.php)
-  Future<void> _showCompletedTasksHistoryDialog(BuildContext context, WidgetRef ref) async {
+  Future<void> _showCompletedTasksHistoryDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final now = DateTime.now();
     final pickedDate = await showDatePicker(
       context: context,
@@ -149,7 +165,10 @@ class TasksScreen extends ConsumerWidget {
             children: [
               // Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [AppColors.forestDeep, AppColors.forest],
@@ -166,7 +185,11 @@ class TasksScreen extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         'Task History ($dateStr)',
-                        style: display(size: 18, color: Colors.white, weight: FontWeight.w700),
+                        style: display(
+                          size: 18,
+                          color: Colors.white,
+                          weight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     IconButton(
@@ -180,13 +203,21 @@ class TasksScreen extends ConsumerWidget {
               Expanded(
                 child: Consumer(
                   builder: (ctx, ref, _) {
-                    final completedAsync = ref.watch(myCompletedTasksProvider(dateStr));
+                    final completedAsync = ref.watch(
+                      myCompletedTasksProvider(dateStr),
+                    );
                     return completedAsync.when(
-                      loading: () => const Center(child: CircularProgressIndicator()),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
                       error: (err, _) => Center(
                         child: Padding(
                           padding: const EdgeInsets.all(24.0),
-                          child: Text('Error: $err', style: const TextStyle(color: AppColors.destructive)),
+                          child: Text(
+                            'Error: $err',
+                            style: const TextStyle(
+                              color: AppColors.destructive,
+                            ),
+                          ),
                         ),
                       ),
                       data: (tasks) {
@@ -203,12 +234,14 @@ class TasksScreen extends ConsumerWidget {
                           itemCount: tasks.length,
                           itemBuilder: (ctx, i) {
                             final t = tasks[i];
-                            final priorityColor = t.isAgenda == '1' ? AppColors.forest : AppColors.mute.withAlpha(80);
+                            final priorityColor = t.isAgenda == '1'
+                                ? AppColors.forest
+                                : AppColors.mute.withAlpha(80);
                             final status = t.done == '1'
                                 ? 'done'
                                 : t.pending == '1'
-                                    ? 'in_progress'
-                                    : 'todo';
+                                ? 'in_progress'
+                                : 'todo';
                             return Container(
                               margin: const EdgeInsets.only(bottom: 10),
                               decoration: BoxDecoration(
@@ -218,15 +251,17 @@ class TasksScreen extends ConsumerWidget {
                               clipBehavior: Clip.antiAlias,
                               child: IntrinsicHeight(
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: [
-                                    Container(
-                                      width: 4,
-                                      color: priorityColor,
-                                    ),
+                                    Container(width: 4, color: priorityColor),
                                     Expanded(
                                       child: InkWell(
-                                        onTap: () => showTaskDetailsDialog(context, ref, t),
+                                        onTap: () => showTaskDetailsDialog(
+                                          context,
+                                          ref,
+                                          t,
+                                        ),
                                         borderRadius: const BorderRadius.only(
                                           topRight: Radius.circular(16),
                                           bottomRight: Radius.circular(16),
@@ -234,7 +269,8 @@ class TasksScreen extends ConsumerWidget {
                                         child: Padding(
                                           padding: const EdgeInsets.all(16),
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Row(
                                                 children: [
@@ -242,8 +278,10 @@ class TasksScreen extends ConsumerWidget {
                                                     child: Text(
                                                       t.details,
                                                       style: const TextStyle(
-                                                          fontSize: 14,
-                                                          fontWeight: FontWeight.w600),
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
                                                     ),
                                                   ),
                                                   const SizedBox(width: 8),
@@ -253,19 +291,37 @@ class TasksScreen extends ConsumerWidget {
                                               const SizedBox(height: 8),
                                               Row(
                                                 children: [
-                                                  const Icon(Icons.access_time, size: 12, color: AppColors.mute),
+                                                  const Icon(
+                                                    Icons.access_time,
+                                                    size: 12,
+                                                    color: AppColors.mute,
+                                                  ),
                                                   const SizedBox(width: 4),
                                                   Expanded(
                                                     child: Text(
                                                       [
-                                                        if (t.worktype.isNotEmpty) t.worktype,
-                                                        if (t.remarks.isNotEmpty) t.remarks,
-                                                        if (t.starttime.isNotEmpty) t.starttime,
-                                                        if (t.time.isNotEmpty) t.time,
+                                                        if (t
+                                                            .worktype
+                                                            .isNotEmpty)
+                                                          t.worktype,
+                                                        if (t
+                                                            .remarks
+                                                            .isNotEmpty)
+                                                          t.remarks,
+                                                        if (t
+                                                            .starttime
+                                                            .isNotEmpty)
+                                                          t.starttime,
+                                                        if (t.time.isNotEmpty)
+                                                          t.time,
                                                       ].join(' · '),
                                                       maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      style: const TextStyle(fontSize: 11, color: AppColors.mute),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: const TextStyle(
+                                                        fontSize: 11,
+                                                        color: AppColors.mute,
+                                                      ),
                                                     ),
                                                   ),
                                                 ],
@@ -322,8 +378,7 @@ class TasksScreen extends ConsumerWidget {
     await showDialog<void>(
       context: context,
       builder: (ctx) => Dialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 460, maxHeight: 600),
           child: StatefulBuilder(
@@ -337,7 +392,10 @@ class TasksScreen extends ConsumerWidget {
                   children: [
                     // Header
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
                           colors: [AppColors.forestDeep, AppColors.forest],
@@ -354,7 +412,11 @@ class TasksScreen extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               'Add a Task',
-                              style: display(size: 18, color: Colors.white, weight: FontWeight.w700),
+                              style: display(
+                                size: 18,
+                                color: Colors.white,
+                                weight: FontWeight.w700,
+                              ),
                             ),
                           ),
                           IconButton(
@@ -373,32 +435,42 @@ class TasksScreen extends ConsumerWidget {
                           children: [
                             DropdownButtonFormField<String>(
                               value: worktype,
-                              decoration:
-                                  const InputDecoration(labelText: 'Work type'),
+                              decoration: const InputDecoration(
+                                labelText: 'Work type',
+                              ),
                               items: const [
                                 DropdownMenuItem(
-                                    value: 'Related to action plan',
-                                    child: Text('Related to action plan')),
+                                  value: 'Related to action plan',
+                                  child: Text('Related to action plan'),
+                                ),
                                 DropdownMenuItem(
-                                    value: 'Assigned by other',
-                                    child: Text('Assigned by other')),
+                                  value: 'Assigned by other',
+                                  child: Text('Assigned by other'),
+                                ),
                                 DropdownMenuItem(
-                                    value: 'Others',
-                                    child: Text('Others')),
+                                  value: 'Others',
+                                  child: Text('Others'),
+                                ),
                               ],
-                              onChanged: (v) =>
-                                  setSt(() => worktype = v ?? 'Related to action plan'),
+                              onChanged: (v) => setSt(
+                                () => worktype = v ?? 'Related to action plan',
+                              ),
                             ),
                             const SizedBox(height: 12),
                             DropdownButtonFormField<String>(
                               value: starttime,
-                              decoration:
-                                  const InputDecoration(labelText: 'Expected Start Time'),
+                              decoration: const InputDecoration(
+                                labelText: 'Expected Start Time',
+                              ),
                               items: const [
                                 DropdownMenuItem(
-                                    value: '1st Half', child: Text('1st Half')),
+                                  value: '1st Half',
+                                  child: Text('1st Half'),
+                                ),
                                 DropdownMenuItem(
-                                    value: '2nd Half', child: Text('2nd Half')),
+                                  value: '2nd Half',
+                                  child: Text('2nd Half'),
+                                ),
                               ],
                               onChanged: (v) =>
                                   setSt(() => starttime = v ?? '1st Half'),
@@ -413,12 +485,22 @@ class TasksScreen extends ConsumerWidget {
                                 labelText: 'Details *',
                                 suffixIcon: isApiSession
                                     ? IconButton(
-                                        icon: const Icon(Icons.add_box_rounded, color: AppColors.forest, size: 24),
+                                        icon: const Icon(
+                                          Icons.add_box_rounded,
+                                          color: AppColors.forest,
+                                          size: 24,
+                                        ),
                                         tooltip: 'Select from Monthly Agenda',
                                         onPressed: () {
-                                          _showAgendaPicker(context, ref, (agenda) {
+                                          _showAgendaPicker(context, ref, (
+                                            agenda,
+                                          ) {
                                             setSt(() {
-                                              details.text = agenda.agenda.replaceAll(RegExp(r"[,!&']"), '');
+                                              details.text = agenda.agenda
+                                                  .replaceAll(
+                                                    RegExp(r"[,!&']"),
+                                                    '',
+                                                  );
                                               isAgenda = '1';
                                               selectedAgenda = agenda.id;
                                             });
@@ -429,12 +511,19 @@ class TasksScreen extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            const Text('(Avoid using any special characters)',
-                                style: TextStyle(fontSize: 11, color: AppColors.destructive)),
+                            const Text(
+                              '(Avoid using any special characters)',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.destructive,
+                              ),
+                            ),
                             const SizedBox(height: 12),
                             TextField(
                               controller: remarks,
-                              decoration: const InputDecoration(labelText: 'Remarks'),
+                              decoration: const InputDecoration(
+                                labelText: 'Remarks',
+                              ),
                             ),
                           ],
                         ),
@@ -444,14 +533,19 @@ class TasksScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: const BoxDecoration(
-                        border: Border(top: BorderSide(color: AppColors.border)),
+                        border: Border(
+                          top: BorderSide(color: AppColors.border),
+                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           TextButton(
                             onPressed: () => Navigator.pop(ctx),
-                            child: const Text('Cancel', style: TextStyle(color: AppColors.destructive)),
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(color: AppColors.destructive),
+                            ),
                           ),
                           const SizedBox(width: 8),
                           ElevatedButton(
@@ -460,23 +554,31 @@ class TasksScreen extends ConsumerWidget {
                                 : () async {
                                     setSt(() => saving = true);
                                     try {
-                                      final session =
-                                          ref.read(sessionControllerProvider)!;
-                                      
+                                      final session = ref.read(
+                                        sessionControllerProvider,
+                                      )!;
+
                                       String lat = '';
                                       String lan = '';
                                       try {
-                                        final pos = await Geolocator.getCurrentPosition(
-                                            desiredAccuracy: LocationAccuracy.medium,
-                                            timeLimit: const Duration(seconds: 5));
+                                        final pos =
+                                            await Geolocator.getCurrentPosition(
+                                              desiredAccuracy:
+                                                  LocationAccuracy.medium,
+                                              timeLimit: const Duration(
+                                                seconds: 5,
+                                              ),
+                                            );
                                         lat = pos.latitude.toString();
                                         lan = pos.longitude.toString();
                                       } catch (_) {}
 
-                                      final detailsText = details.text.trim()
+                                      final detailsText = details.text
+                                          .trim()
                                           .replaceAll('\u0027', '')
                                           .replaceAll(RegExp("/,|!|'&"), "");
-                                      final remarksText = remarks.text.trim()
+                                      final remarksText = remarks.text
+                                          .trim()
                                           .replaceAll('\u0027', '')
                                           .replaceAll(RegExp("/,|!|'&"), "");
 
@@ -495,7 +597,9 @@ class TasksScreen extends ConsumerWidget {
                                             lan: lan,
                                           );
                                       if (!res.ok) {
-                                        throw Exception('Server rejected the task');
+                                        throw Exception(
+                                          'Server rejected the task',
+                                        );
                                       }
                                       ref.invalidate(myTasksProvider);
                                       ref.invalidate(myRawTasksProvider);
@@ -504,10 +608,12 @@ class TasksScreen extends ConsumerWidget {
                                       setSt(() => saving = false);
                                       if (ctx.mounted) {
                                         ScaffoldMessenger.of(ctx).showSnackBar(
-                                            SnackBar(
-                                                content: Text('Failed: $e'),
-                                                backgroundColor:
-                                                    AppColors.destructive));
+                                          SnackBar(
+                                            content: Text('Failed: $e'),
+                                            backgroundColor:
+                                                AppColors.destructive,
+                                          ),
+                                        );
                                       }
                                     }
                                   },
@@ -516,7 +622,10 @@ class TasksScreen extends ConsumerWidget {
                                     width: 18,
                                     height: 18,
                                     child: CircularProgressIndicator(
-                                        strokeWidth: 2, color: Colors.white))
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
                                 : const Text('Save Task'),
                           ),
                         ],
@@ -524,7 +633,7 @@ class TasksScreen extends ConsumerWidget {
                     ),
                   ],
                 );
-              }
+              },
             ),
           ),
         ),
@@ -538,7 +647,6 @@ class _InboxList extends ConsumerWidget {
   final Map<String, Profile> profiles;
   const _InboxList({required this.tasks, required this.profiles});
 
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(sessionControllerProvider);
@@ -549,19 +657,22 @@ class _InboxList extends ConsumerWidget {
         child: Center(
           child: Padding(
             padding: EdgeInsets.all(24),
-            child: Text('Nothing assigned to you. Enjoy the calm 🌿',
-                style: TextStyle(fontSize: 13, color: AppColors.mute)),
+            child: Text(
+              'Nothing assigned to you. Enjoy the calm 🌿',
+              style: TextStyle(fontSize: 13, color: AppColors.mute),
+            ),
           ),
         ),
       );
     }
-     return ListView.separated(
+    return ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
       itemCount: tasks.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (context, i) {
         final t = tasks[i];
-        final overdue = t.isOpen &&
+        final overdue =
+            t.isOpen &&
             t.dueDate != null &&
             t.dueDate!.isBefore(DateTime.now());
         final assigner = profiles[t.assignerId]?.fullName;
@@ -585,7 +696,8 @@ class _InboxList extends ConsumerWidget {
                     break;
                   }
                 }
-                final raw = found ??
+                final raw =
+                    found ??
                     TaskModel(
                       id: t.id,
                       details: t.title,
@@ -606,10 +718,7 @@ class _InboxList extends ConsumerWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      width: 4,
-                      color: pCol,
-                    ),
+                    Container(width: 4, color: pCol),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(14),
@@ -622,18 +731,32 @@ class _InboxList extends ConsumerWidget {
                                   child: Row(
                                     children: [
                                       Expanded(
-                                        child: Text(t.title,
-                                            style: const TextStyle(
-                                                fontSize: 14, fontWeight: FontWeight.w600)),
+                                        child: Text(
+                                          t.title,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
                                       ),
                                       if (isApiSession) ...[
                                         const SizedBox(width: 4),
                                         IconButton(
-                                          icon: const Icon(Icons.edit, size: 14, color: AppColors.mute),
+                                          icon: const Icon(
+                                            Icons.edit,
+                                            size: 14,
+                                            color: AppColors.mute,
+                                          ),
                                           padding: EdgeInsets.zero,
                                           constraints: const BoxConstraints(),
                                           tooltip: 'Edit details',
-                                          onPressed: () => _openEditDetailsDialog(context, ref, t.id, t.title),
+                                          onPressed: () =>
+                                              _openEditDetailsDialog(
+                                                context,
+                                                ref,
+                                                t.id,
+                                                t.title,
+                                              ),
                                         ),
                                       ],
                                     ],
@@ -645,38 +768,53 @@ class _InboxList extends ConsumerWidget {
                                 StatusPill(overdue ? 'overdue' : t.status),
                               ],
                             ),
-                            if (t.description != null && t.description!.isNotEmpty) ...[
+                            if (t.description != null &&
+                                t.description!.isNotEmpty) ...[
                               const SizedBox(height: 6),
-                              Text(t.description!,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                      fontSize: 12, color: AppColors.mute)),
+                              Text(
+                                t.description!,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.mute,
+                                ),
+                              ),
                             ],
                             const SizedBox(height: 10),
                             Row(
                               children: [
                                 if (assigner != null)
-                                  Text('From $assigner',
-                                      style: const TextStyle(
-                                          fontSize: 11, color: AppColors.mute)),
+                                  Text(
+                                    'From $assigner',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.mute,
+                                    ),
+                                  ),
                                 if (t.dueDate != null) ...[
-                                  if (assigner != null) const SizedBox(width: 10),
-                                  Icon(Icons.schedule,
-                                      size: 12,
+                                  if (assigner != null)
+                                    const SizedBox(width: 10),
+                                  Icon(
+                                    Icons.schedule,
+                                    size: 12,
+                                    color: overdue
+                                        ? AppColors.destructive
+                                        : AppColors.mute,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    fmtDeadline(t.dueDate!),
+                                    style: TextStyle(
+                                      fontSize: 11,
                                       color: overdue
                                           ? AppColors.destructive
-                                          : AppColors.mute),
-                                  const SizedBox(width: 3),
-                                  Text(fmtDeadline(t.dueDate!),
-                                      style: TextStyle(
-                                          fontSize: 11,
-                                          color: overdue
-                                              ? AppColors.destructive
-                                              : AppColors.mute,
-                                          fontWeight: overdue
-                                              ? FontWeight.w700
-                                              : FontWeight.w400)),
+                                          : AppColors.mute,
+                                      fontWeight: overdue
+                                          ? FontWeight.w700
+                                          : FontWeight.w400,
+                                    ),
+                                  ),
                                 ],
                               ],
                             ),
@@ -695,7 +833,6 @@ class _InboxList extends ConsumerWidget {
   }
 }
 
-
 class _DelegatedList extends StatelessWidget {
   final List<TaskItem> tasks;
   final Map<String, Profile> profiles;
@@ -708,8 +845,10 @@ class _DelegatedList extends StatelessWidget {
         child: Center(
           child: Padding(
             padding: EdgeInsets.all(24),
-            child: Text('You haven\'t delegated any tasks yet.',
-                style: TextStyle(fontSize: 13, color: AppColors.mute)),
+            child: Text(
+              'You haven\'t delegated any tasks yet.',
+              style: TextStyle(fontSize: 13, color: AppColors.mute),
+            ),
           ),
         ),
       );
@@ -733,13 +872,13 @@ class _DelegatedList extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    width: 4,
-                    color: pCol,
-                  ),
+                  Container(width: 4, color: pCol),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                       child: Row(
                         children: [
                           Expanded(
@@ -747,7 +886,9 @@ class _DelegatedList extends StatelessWidget {
                               '${t.title}  →  ${profiles[t.assigneeId]?.fullName ?? '—'}',
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w500),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -775,12 +916,20 @@ class _ToursList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final toursAsync = ref.watch(myToursProvider);
     return toursAsync.when(
-      loading: () => const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator())),
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32),
+          child: CircularProgressIndicator(),
+        ),
+      ),
       error: (err, _) => Card(
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Text('Error loading tours: $err', style: const TextStyle(color: AppColors.destructive)),
+            child: Text(
+              'Error loading tours: $err',
+              style: const TextStyle(color: AppColors.destructive),
+            ),
           ),
         ),
       ),
@@ -790,7 +939,10 @@ class _ToursList extends ConsumerWidget {
             child: Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
-                child: Text('No tours found.', style: TextStyle(fontSize: 13, color: AppColors.mute)),
+                child: Text(
+                  'No tours found.',
+                  style: TextStyle(fontSize: 13, color: AppColors.mute),
+                ),
               ),
             ),
           );
@@ -812,7 +964,8 @@ class _ToursList extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(16),
                 child: InkWell(
                   onTap: () {
-                    final rawTasks = ref.read(myRawTasksProvider).valueOrNull ?? [];
+                    final rawTasks =
+                        ref.read(myRawTasksProvider).valueOrNull ?? [];
                     TaskModel? found;
                     for (final r in rawTasks) {
                       if (r.id == t.id) {
@@ -820,7 +973,8 @@ class _ToursList extends ConsumerWidget {
                         break;
                       }
                     }
-                    final raw = found ??
+                    final raw =
+                        found ??
                         TaskModel(
                           id: t.id,
                           details: t.details,
@@ -844,10 +998,7 @@ class _ToursList extends ConsumerWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Container(
-                          width: 4,
-                          color: sCol,
-                        ),
+                        Container(width: 4, color: sCol),
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.all(14),
@@ -857,36 +1008,61 @@ class _ToursList extends ConsumerWidget {
                                 Row(
                                   children: [
                                     Expanded(
-                                      child: Text(t.details, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                                      child: Text(
+                                        t.details,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
                                     ),
                                     const SizedBox(width: 8),
                                     StatusPill(t.isDone ? 'done' : 'todo'),
                                   ],
                                 ),
                                 const SizedBox(height: 6),
-                                Text('Route / Info: ${t.worktype} • ${t.remarks.isEmpty ? "No remarks" : t.remarks}',
-                                    style: const TextStyle(fontSize: 12, color: AppColors.mute)),
+                                Text(
+                                  'Route / Info: ${t.worktype} • ${t.remarks.isEmpty ? "No remarks" : t.remarks}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.mute,
+                                  ),
+                                ),
                                 const SizedBox(height: 10),
                                 Row(
                                   children: [
-                                    const Icon(Icons.location_on, size: 12, color: AppColors.mute),
+                                    const Icon(
+                                      Icons.location_on,
+                                      size: 12,
+                                      color: AppColors.mute,
+                                    ),
                                     const SizedBox(width: 3),
                                     Expanded(
                                       child: Text(
                                         t.selectedTerritory ?? 'No Territory',
-                                        style: const TextStyle(fontSize: 11, color: AppColors.mute),
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.mute,
+                                        ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     const SizedBox(width: 8),
-                                    Text('${t.date} ${t.time}', style: const TextStyle(fontSize: 11, color: AppColors.mute)),
+                                    Text(
+                                      '${t.date} ${t.time}',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.mute,
+                                      ),
+                                    ),
                                     if (!t.isDone) ...[
                                       const SizedBox(width: 8),
                                       TextButton(
                                         style: TextButton.styleFrom(
                                           padding: EdgeInsets.zero,
                                           minimumSize: Size.zero,
-                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
                                         ),
                                         onPressed: () {
                                           final raw = TaskModel(
@@ -904,11 +1080,23 @@ class _ToursList extends ConsumerWidget {
                                             isAgenda: t.isAgenda,
                                             doneDate: t.doneDate,
                                             doneTime: t.doneTime,
-                                            selectedTerritory: t.selectedTerritory,
+                                            selectedTerritory:
+                                                t.selectedTerritory,
                                           );
-                                          _showTourUpdateDialog(context, ref, raw);
+                                          _showTourUpdateDialog(
+                                            context,
+                                            ref,
+                                            raw,
+                                          );
                                         },
-                                        child: const Text('Update', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.forest)),
+                                        child: const Text(
+                                          'Update',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.forest,
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ],
@@ -930,7 +1118,12 @@ class _ToursList extends ConsumerWidget {
   }
 }
 
-Future<void> _openEditDetailsDialog(BuildContext context, WidgetRef ref, String taskId, String currentDetails) async {
+Future<void> _openEditDetailsDialog(
+  BuildContext context,
+  WidgetRef ref,
+  String taskId,
+  String currentDetails,
+) async {
   final controller = TextEditingController(text: currentDetails);
   bool saving = false;
   await showDialog<void>(
@@ -945,7 +1138,10 @@ Future<void> _openEditDetailsDialog(BuildContext context, WidgetRef ref, String 
             children: [
               // Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [AppColors.forestDeep, AppColors.forest],
@@ -962,7 +1158,11 @@ Future<void> _openEditDetailsDialog(BuildContext context, WidgetRef ref, String 
                     Expanded(
                       child: Text(
                         'Edit Task Details',
-                        style: display(size: 16, color: Colors.white, weight: FontWeight.w700),
+                        style: display(
+                          size: 16,
+                          color: Colors.white,
+                          weight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     IconButton(
@@ -997,26 +1197,48 @@ Future<void> _openEditDetailsDialog(BuildContext context, WidgetRef ref, String 
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Cancel', style: TextStyle(color: AppColors.destructive)),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: AppColors.destructive),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: saving ? null : () async {
-                        setSt(() => saving = true);
-                        try {
-                          await ref.read(apiServiceProvider).updateTaskDetails(taskId, controller.text.trim());
-                          ref.invalidate(myTasksProvider);
-                          ref.invalidate(myRawTasksProvider);
-                          if (ctx.mounted) Navigator.pop(ctx);
-                        } catch (e) {
-                          setSt(() => saving = false);
-                          if (ctx.mounted) {
-                            ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.destructive));
-                          }
-                        }
-                      },
+                      onPressed: saving
+                          ? null
+                          : () async {
+                              setSt(() => saving = true);
+                              try {
+                                await ref
+                                    .read(apiServiceProvider)
+                                    .updateTaskDetails(
+                                      taskId,
+                                      controller.text.trim(),
+                                    );
+                                ref.invalidate(myTasksProvider);
+                                ref.invalidate(myRawTasksProvider);
+                                if (ctx.mounted) Navigator.pop(ctx);
+                              } catch (e) {
+                                setSt(() => saving = false);
+                                if (ctx.mounted) {
+                                  ScaffoldMessenger.of(ctx).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Error: $e'),
+                                      backgroundColor: AppColors.destructive,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
                       child: saving
-                          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
                           : const Text('Save'),
                     ),
                   ],
@@ -1030,7 +1252,11 @@ Future<void> _openEditDetailsDialog(BuildContext context, WidgetRef ref, String 
   );
 }
 
-void _showAgendaPicker(BuildContext context, WidgetRef ref, Function(AgendaModel) onSelect) {
+void _showAgendaPicker(
+  BuildContext context,
+  WidgetRef ref,
+  Function(AgendaModel) onSelect,
+) {
   showDialog<void>(
     context: context,
     builder: (ctx) {
@@ -1044,7 +1270,10 @@ void _showAgendaPicker(BuildContext context, WidgetRef ref, Function(AgendaModel
             children: [
               // Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [AppColors.forestDeep, AppColors.forest],
@@ -1061,7 +1290,11 @@ void _showAgendaPicker(BuildContext context, WidgetRef ref, Function(AgendaModel
                     Expanded(
                       child: Text(
                         'Select from Monthly Agenda',
-                        style: display(size: 16, color: Colors.white, weight: FontWeight.w700),
+                        style: display(
+                          size: 16,
+                          color: Colors.white,
+                          weight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     IconButton(
@@ -1073,14 +1306,18 @@ void _showAgendaPicker(BuildContext context, WidgetRef ref, Function(AgendaModel
               ),
               Expanded(
                 child: agendasAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (err, _) => Center(child: Text('Error: $err')),
                   data: (agendas) {
                     if (agendas.isEmpty) {
                       return const Center(
                         child: Padding(
                           padding: EdgeInsets.all(24),
-                          child: Text('No agenda items found for this month.', style: TextStyle(color: AppColors.mute)),
+                          child: Text(
+                            'No agenda items found for this month.',
+                            style: TextStyle(color: AppColors.mute),
+                          ),
                         ),
                       );
                     }
@@ -1093,7 +1330,10 @@ void _showAgendaPicker(BuildContext context, WidgetRef ref, Function(AgendaModel
                         return Card(
                           color: AppColors.bg,
                           child: ListTile(
-                            title: Text(a.agenda, style: const TextStyle(fontSize: 13)),
+                            title: Text(
+                              a.agenda,
+                              style: const TextStyle(fontSize: 13),
+                            ),
                             onTap: () {
                               onSelect(a);
                               Navigator.pop(ctx);
@@ -1113,7 +1353,11 @@ void _showAgendaPicker(BuildContext context, WidgetRef ref, Function(AgendaModel
   );
 }
 
-Future<void> showTaskDetailsDialog(BuildContext context, WidgetRef ref, TaskModel task) async {
+Future<void> showTaskDetailsDialog(
+  BuildContext context,
+  WidgetRef ref,
+  TaskModel task,
+) async {
   final session = ref.read(sessionControllerProvider);
   final isApiSession = session != null && !session.isDemo;
 
@@ -1125,9 +1369,14 @@ Future<void> showTaskDetailsDialog(BuildContext context, WidgetRef ref, TaskMode
         constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
         child: StatefulBuilder(
           builder: (ctx, setSt) {
-            final isDone = task.done == '1' || task.status.toLowerCase() == 'done';
-            final isProcessing = task.pending == '1' || task.status.toLowerCase() == 'in_progress';
-            final statusStr = isDone ? 'Done' : (isProcessing ? 'Processing' : 'Pending');
+            final isDone =
+                task.done == '1' || task.status.toLowerCase() == 'done';
+            final isProcessing =
+                task.pending == '1' ||
+                task.status.toLowerCase() == 'in_progress';
+            final statusStr = isDone
+                ? 'Done'
+                : (isProcessing ? 'Processing' : 'Pending');
             final statusColor = isDone
                 ? AppColors.green
                 : (isProcessing ? AppColors.orange : AppColors.blue);
@@ -1150,7 +1399,10 @@ Future<void> showTaskDetailsDialog(BuildContext context, WidgetRef ref, TaskMode
               children: [
                 // Header
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: [AppColors.forestDeep, AppColors.forest],
@@ -1167,7 +1419,11 @@ Future<void> showTaskDetailsDialog(BuildContext context, WidgetRef ref, TaskMode
                       Expanded(
                         child: Text(
                           'Task Details',
-                          style: display(size: 18, color: Colors.white, weight: FontWeight.w700),
+                          style: display(
+                            size: 18,
+                            color: Colors.white,
+                            weight: FontWeight.w700,
+                          ),
                         ),
                       ),
                       IconButton(
@@ -1193,7 +1449,10 @@ Future<void> showTaskDetailsDialog(BuildContext context, WidgetRef ref, TaskMode
                             ),
                             Text(
                               task.date,
-                              style: const TextStyle(fontSize: 12, color: AppColors.mute),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.mute,
+                              ),
                             ),
                           ],
                         ),
@@ -1205,17 +1464,35 @@ Future<void> showTaskDetailsDialog(BuildContext context, WidgetRef ref, TaskMode
                         const SizedBox(height: 12),
                         const Divider(),
                         const SizedBox(height: 12),
-                        _buildInfoRow('Work Type', task.worktype.isEmpty ? 'N/A' : task.worktype),
+                        _buildInfoRow(
+                          'Work Type',
+                          task.worktype.isEmpty ? 'N/A' : task.worktype,
+                        ),
                         const SizedBox(height: 8),
-                        _buildInfoRow('Expected Start', task.starttime.isEmpty ? 'N/A' : task.starttime),
+                        _buildInfoRow(
+                          'Expected Start',
+                          task.starttime.isEmpty ? 'N/A' : task.starttime,
+                        ),
                         const SizedBox(height: 8),
-                        _buildInfoRow('Remarks', task.remarks.isEmpty ? 'None' : task.remarks),
+                        _buildInfoRow(
+                          'Remarks',
+                          task.remarks.isEmpty ? 'None' : task.remarks,
+                        ),
                         if (task.isAgenda == '2') ...[
                           const SizedBox(height: 8),
-                          _buildInfoRow('Target Territories', territoriesList.isEmpty ? 'None' : territoriesList.join(', ')),
-                          if (task.visitedTerritory != null && task.visitedTerritory!.isNotEmpty) ...[
+                          _buildInfoRow(
+                            'Target Territories',
+                            territoriesList.isEmpty
+                                ? 'None'
+                                : territoriesList.join(', '),
+                          ),
+                          if (task.visitedTerritory != null &&
+                              task.visitedTerritory!.isNotEmpty) ...[
                             const SizedBox(height: 8),
-                            _buildInfoRow('Visited Territory', task.visitedTerritory!),
+                            _buildInfoRow(
+                              'Visited Territory',
+                              task.visitedTerritory!,
+                            ),
                           ],
                         ],
                         const SizedBox(height: 24),
@@ -1228,7 +1505,8 @@ Future<void> showTaskDetailsDialog(BuildContext context, WidgetRef ref, TaskMode
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       const Text(
                                         'Status',
@@ -1294,7 +1572,12 @@ Future<void> showTaskDetailsDialog(BuildContext context, WidgetRef ref, TaskMode
                         TextButton.icon(
                           onPressed: () {
                             Navigator.pop(ctx);
-                            _openEditDetailsDialog(context, ref, task.id, task.details);
+                            _openEditDetailsDialog(
+                              context,
+                              ref,
+                              task.id,
+                              task.details,
+                            );
                           },
                           icon: const Icon(Icons.edit, size: 16),
                           label: const Text('Edit Details'),
@@ -1330,7 +1613,11 @@ Widget _buildInfoRow(String label, String value) {
         width: 120,
         child: Text(
           label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.mute),
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppColors.mute,
+          ),
         ),
       ),
       Expanded(
@@ -1343,7 +1630,11 @@ Widget _buildInfoRow(String label, String value) {
   );
 }
 
-void _showStatusUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task) {
+void _showStatusUpdateDialog(
+  BuildContext context,
+  WidgetRef ref,
+  TaskModel task,
+) {
   String selected = 'Processing';
   bool submitting = false;
 
@@ -1359,7 +1650,10 @@ void _showStatusUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task
             children: [
               // Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [AppColors.forestDeep, AppColors.forest],
@@ -1376,7 +1670,11 @@ void _showStatusUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task
                     Expanded(
                       child: Text(
                         'Update Task Status',
-                        style: display(size: 16, color: Colors.white, weight: FontWeight.w700),
+                        style: display(
+                          size: 16,
+                          color: Colors.white,
+                          weight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     IconButton(
@@ -1394,7 +1692,10 @@ void _showStatusUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task
                     value: selected,
                     decoration: const InputDecoration(labelText: 'Status'),
                     items: const [
-                      DropdownMenuItem(value: 'Processing', child: Text('Processing')),
+                      DropdownMenuItem(
+                        value: 'Processing',
+                        child: Text('Processing'),
+                      ),
                       DropdownMenuItem(value: 'Done', child: Text('Done')),
                     ],
                     onChanged: (v) => setSt(() => selected = v ?? 'Processing'),
@@ -1412,7 +1713,10 @@ void _showStatusUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Cancel', style: TextStyle(color: AppColors.destructive)),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: AppColors.destructive),
+                      ),
                     ),
                     const SizedBox(width: 12),
                     ElevatedButton(
@@ -1423,40 +1727,61 @@ void _showStatusUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task
                               try {
                                 String lat = '', lan = '';
                                 try {
-                                  final pos = await Geolocator.getCurrentPosition(
-                                      desiredAccuracy: LocationAccuracy.medium,
-                                      timeLimit: const Duration(seconds: 5));
+                                  final pos =
+                                      await Geolocator.getCurrentPosition(
+                                        desiredAccuracy:
+                                            LocationAccuracy.medium,
+                                        timeLimit: const Duration(seconds: 5),
+                                      );
                                   lat = pos.latitude.toString();
                                   lan = pos.longitude.toString();
                                 } catch (_) {}
 
-                                final typeCode = selected == 'Processing' ? '0' : '1';
-                                final res = await ref.read(apiServiceProvider).updateTask(
+                                final typeCode = selected == 'Processing'
+                                    ? '0'
+                                    : '1';
+                                final res = await ref
+                                    .read(apiServiceProvider)
+                                    .updateTask(
                                       taskId: task.id,
                                       type: typeCode,
                                       visitedTerritory: 'none',
                                       lat: lat,
                                       lan: lan,
                                     );
-                                if (!res.ok) throw Exception('Failed to update status');
+                                if (!res.ok)
+                                  throw Exception('Failed to update status');
 
                                 ref.invalidate(myTasksProvider);
                                 ref.invalidate(myRawTasksProvider);
 
                                 if (ctx.mounted) {
                                   Navigator.pop(ctx); // Close update dialog
-                                  Navigator.pop(context); // Close details dialog
+                                  Navigator.pop(
+                                    context,
+                                  ); // Close details dialog
                                 }
                               } catch (e) {
                                 setSt(() => submitting = false);
                                 if (ctx.mounted) {
                                   ScaffoldMessenger.of(ctx).showSnackBar(
-                                      SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.destructive));
+                                    SnackBar(
+                                      content: Text('Error: $e'),
+                                      backgroundColor: AppColors.destructive,
+                                    ),
+                                  );
                                 }
                               }
                             },
                       child: submitting
-                          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
                           : const Text('Submit'),
                     ),
                   ],
@@ -1470,7 +1795,11 @@ void _showStatusUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task
   );
 }
 
-void _showTourUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task) {
+void _showTourUpdateDialog(
+  BuildContext context,
+  WidgetRef ref,
+  TaskModel task,
+) {
   String locationType = 'Head Office';
   final TextEditingController searchController = TextEditingController();
   final List<String> selectedTerritories = [];
@@ -1494,7 +1823,8 @@ void _showTourUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task) 
   showDialog<void>(
     context: context,
     builder: (ctx) {
-      final allTerritories = ref.watch(territoriesListProvider).valueOrNull ?? [];
+      final allTerritories =
+          ref.watch(territoriesListProvider).valueOrNull ?? [];
       if (filteredTerritories.isEmpty && searchController.text.isEmpty) {
         filteredTerritories = allTerritories;
       }
@@ -1508,7 +1838,10 @@ void _showTourUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task) 
               void filter(String text) {
                 setSt(() {
                   filteredTerritories = allTerritories
-                      .where((t) => t.name.toLowerCase().contains(text.toLowerCase()))
+                      .where(
+                        (t) =>
+                            t.name.toLowerCase().contains(text.toLowerCase()),
+                      )
                       .toList();
                 });
               }
@@ -1518,7 +1851,10 @@ void _showTourUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task) 
                 children: [
                   // Header
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [AppColors.forestDeep, AppColors.forest],
@@ -1535,7 +1871,11 @@ void _showTourUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task) 
                         Expanded(
                           child: Text(
                             'Update Tour Status',
-                            style: display(size: 16, color: Colors.white, weight: FontWeight.w700),
+                            style: display(
+                              size: 16,
+                              color: Colors.white,
+                              weight: FontWeight.w700,
+                            ),
                           ),
                         ),
                         IconButton(
@@ -1554,25 +1894,43 @@ void _showTourUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task) 
                         children: [
                           const Text(
                             'Current Location',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.forestDeep),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.forestDeep,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           DropdownButtonFormField<String>(
                             value: locationType,
                             decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
                             ),
                             items: const [
-                              DropdownMenuItem(value: 'Head Office', child: Text('Head Office')),
-                              DropdownMenuItem(value: 'On Tour', child: Text('On Tour')),
+                              DropdownMenuItem(
+                                value: 'Head Office',
+                                child: Text('Head Office'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'On Tour',
+                                child: Text('On Tour'),
+                              ),
                             ],
-                            onChanged: (v) => setSt(() => locationType = v ?? 'Head Office'),
+                            onChanged: (v) =>
+                                setSt(() => locationType = v ?? 'Head Office'),
                           ),
                           if (locationType == 'On Tour') ...[
                             const SizedBox(height: 16),
                             const Text(
                               'Select Visited Territories (up to 3)',
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.forestDeep),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.forestDeep,
+                              ),
                             ),
                             const SizedBox(height: 6),
                             TextField(
@@ -1581,8 +1939,13 @@ void _showTourUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task) 
                               decoration: InputDecoration(
                                 prefixIcon: const Icon(Icons.search, size: 18),
                                 hintText: 'Search territories...',
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -1591,12 +1954,23 @@ void _showTourUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task) 
                                 spacing: 6,
                                 runSpacing: 4,
                                 children: selectedTerritories
-                                    .map((t) => Chip(
-                                          label: Text(t, style: const TextStyle(fontSize: 11)),
-                                          deleteIcon: const Icon(Icons.close, size: 14),
-                                          onDeleted: () => setSt(() => selectedTerritories.remove(t)),
-                                          backgroundColor: AppColors.lime.withAlpha(60),
-                                        ))
+                                    .map(
+                                      (t) => Chip(
+                                        label: Text(
+                                          t,
+                                          style: const TextStyle(fontSize: 11),
+                                        ),
+                                        deleteIcon: const Icon(
+                                          Icons.close,
+                                          size: 14,
+                                        ),
+                                        onDeleted: () => setSt(
+                                          () => selectedTerritories.remove(t),
+                                        ),
+                                        backgroundColor: AppColors.lime
+                                            .withAlpha(60),
+                                      ),
+                                    )
                                     .toList(),
                               ),
                             const SizedBox(height: 6),
@@ -1606,21 +1980,36 @@ void _showTourUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task) 
                                 itemCount: filteredTerritories.length,
                                 itemBuilder: (ctx, i) {
                                   final name = filteredTerritories[i].name;
-                                  final selected = selectedTerritories.contains(name);
+                                  final selected = selectedTerritories.contains(
+                                    name,
+                                  );
                                   return ListTile(
                                     dense: true,
                                     visualDensity: VisualDensity.compact,
-                                    title: Text(name, style: TextStyle(fontSize: 13, fontWeight: selected ? FontWeight.w700 : FontWeight.w400)),
+                                    title: Text(
+                                      name,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: selected
+                                            ? FontWeight.w700
+                                            : FontWeight.w400,
+                                      ),
+                                    ),
                                     leading: Icon(
-                                      selected ? Icons.check_circle : Icons.circle_outlined,
+                                      selected
+                                          ? Icons.check_circle
+                                          : Icons.circle_outlined,
                                       size: 18,
-                                      color: selected ? AppColors.forest : AppColors.mute,
+                                      color: selected
+                                          ? AppColors.forest
+                                          : AppColors.mute,
                                     ),
                                     onTap: () {
                                       setSt(() {
                                         if (selected) {
                                           selectedTerritories.remove(name);
-                                        } else if (selectedTerritories.length < 3) {
+                                        } else if (selectedTerritories.length <
+                                            3) {
                                           selectedTerritories.add(name);
                                         }
                                       });
@@ -1645,34 +2034,53 @@ void _showTourUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task) 
                       children: [
                         TextButton(
                           onPressed: () => Navigator.pop(ctx),
-                          child: const Text('Cancel', style: TextStyle(color: AppColors.destructive)),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(color: AppColors.destructive),
+                          ),
                         ),
                         const SizedBox(width: 12),
                         ElevatedButton(
-                          onPressed: submitting || (locationType == 'On Tour' && selectedTerritories.isEmpty)
+                          onPressed:
+                              submitting ||
+                                  (locationType == 'On Tour' &&
+                                      selectedTerritories.isEmpty)
                               ? null
                               : () async {
                                   setSt(() => submitting = true);
                                   try {
                                     String lat = '', lan = '';
                                     try {
-                                      final pos = await Geolocator.getCurrentPosition(
-                                          desiredAccuracy: LocationAccuracy.medium,
-                                          timeLimit: const Duration(seconds: 5));
+                                      final pos =
+                                          await Geolocator.getCurrentPosition(
+                                            desiredAccuracy:
+                                                LocationAccuracy.medium,
+                                            timeLimit: const Duration(
+                                              seconds: 5,
+                                            ),
+                                          );
                                       lat = pos.latitude.toString();
                                       lan = pos.longitude.toString();
                                     } catch (_) {}
 
-                                    final visitedTerritory = locationType == 'Head Office' ? 'HO' : jsonEncode(selectedTerritories);
+                                    final visitedTerritory =
+                                        locationType == 'Head Office'
+                                        ? 'HO'
+                                        : jsonEncode(selectedTerritories);
 
-                                    final res = await ref.read(apiServiceProvider).updateTask(
+                                    final res = await ref
+                                        .read(apiServiceProvider)
+                                        .updateTask(
                                           taskId: task.id,
                                           type: '1',
                                           visitedTerritory: visitedTerritory,
                                           lat: lat,
                                           lan: lan,
                                         );
-                                    if (!res.ok) throw Exception('Failed to update tour status');
+                                    if (!res.ok)
+                                      throw Exception(
+                                        'Failed to update tour status',
+                                      );
 
                                     ref.invalidate(myTasksProvider);
                                     ref.invalidate(myToursProvider);
@@ -1680,18 +2088,32 @@ void _showTourUpdateDialog(BuildContext context, WidgetRef ref, TaskModel task) 
 
                                     if (ctx.mounted) {
                                       Navigator.pop(ctx); // Close tour dialog
-                                      Navigator.pop(context); // Close details dialog
+                                      Navigator.pop(
+                                        context,
+                                      ); // Close details dialog
                                     }
                                   } catch (e) {
                                     setSt(() => submitting = false);
                                     if (ctx.mounted) {
                                       ScaffoldMessenger.of(ctx).showSnackBar(
-                                          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.destructive));
+                                        SnackBar(
+                                          content: Text('Error: $e'),
+                                          backgroundColor:
+                                              AppColors.destructive,
+                                        ),
+                                      );
                                     }
                                   }
                                 },
                           child: submitting
-                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
                               : const Text('Submit'),
                         ),
                       ],

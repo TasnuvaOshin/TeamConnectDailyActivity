@@ -42,9 +42,9 @@ class PerformanceResponse {
       supervisor: Supervisor.fromJson(_asMap(json['supervisor'])),
       filter: PerformanceFilter.fromJson(_asMap(json['filter'])),
       summary: PerformanceSummary.fromJson(_asMap(json['summary'])),
-      employees: _asList(
-        json['employees'],
-      ).map((item) => EmployeePerformance.fromJson(_asMap(item))).toList(),
+      employees: _asList(json['employees'])
+          .map((item) => EmployeePerformance.fromJson(_asMap(item)))
+          .toList(),
     );
   }
 }
@@ -61,10 +61,10 @@ class Supervisor {
   });
 
   factory Supervisor.fromJson(Map<String, dynamic> json) => Supervisor(
-    empId: _text(json['emp_id']),
-    name: _text(json['emp_name']),
-    designation: _text(json['emp_designation']),
-  );
+        empId: _text(json['emp_id']),
+        name: _text(json['emp_name']),
+        designation: _text(json['emp_designation']),
+      );
 }
 
 class PerformanceFilter {
@@ -173,19 +173,17 @@ class EmployeeInfo {
   });
 
   factory EmployeeInfo.fromJson(Map<String, dynamic> json) => EmployeeInfo(
-    empId: _text(json['emp_id']),
-    name: _text(json['emp_name']),
-    designation: _text(json['emp_designation']),
-    portfolio: _text(json['portfolio']),
-    team: _text(json['team']),
-    location: _text(json['location']),
-  );
+        empId: _text(json['emp_id']),
+        name: _text(json['emp_name']),
+        designation: _text(json['emp_designation']),
+        portfolio: _text(json['portfolio']),
+        team: _text(json['team']),
+        location: _text(json['location']),
+      );
 
   String get initials {
-    final parts = name
-        .split(RegExp(r'\s+'))
-        .where((part) => part.isNotEmpty)
-        .toList();
+    final parts =
+        name.split(RegExp(r'\s+')).where((part) => part.isNotEmpty).toList();
 
     if (parts.isEmpty) return '?';
     if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
@@ -213,13 +211,13 @@ class RatingData {
 
     return RatingData(
       summary: RatingSummaryData.fromJson(_asMap(json['summary'])),
-      monthwise: _asList(
-        json['monthwise'],
-      ).map((item) => MonthRating.fromJson(_asMap(item))).toList(),
+      monthwise: _asList(json['monthwise'])
+          .map((item) => MonthRating.fromJson(_asMap(item)))
+          .toList(),
       ratedByMeCount: _toInt(ratedByMe['count']),
-      ratedByMeReviews: _asList(
-        ratedByMe['reviews'],
-      ).map((item) => RatingReview.fromJson(_asMap(item))).toList(),
+      ratedByMeReviews: _asList(ratedByMe['reviews'])
+          .map((item) => RatingReview.fromJson(_asMap(item)))
+          .toList(),
     );
   }
 }
@@ -276,12 +274,12 @@ class MonthRating {
   });
 
   factory MonthRating.fromJson(Map<String, dynamic> json) => MonthRating(
-    label: _text(json['label']),
-    summary: RatingSummaryData.fromJson(_asMap(json['summary'])),
-    reviews: _asList(
-      json['reviews'],
-    ).map((item) => RatingReview.fromJson(_asMap(item))).toList(),
-  );
+        label: _text(json['label']),
+        summary: RatingSummaryData.fromJson(_asMap(json['summary'])),
+        reviews: _asList(json['reviews'])
+            .map((item) => RatingReview.fromJson(_asMap(item)))
+            .toList(),
+      );
 }
 
 class RatingReview {
@@ -306,15 +304,15 @@ class RatingReview {
   });
 
   factory RatingReview.fromJson(Map<String, dynamic> json) => RatingReview(
-    date: _text(json['date']),
-    time: _text(json['time']),
-    rtaRating: _toDouble(json['rta_rating']),
-    rtaReview: _text(json['rta_review']),
-    otherRating: _toDouble(json['other_rating']),
-    otherReview: _text(json['other_review']),
-    average: _toDouble(json['avg_rating']),
-    ratedBy: RatedBy.fromJson(_asMap(json['rated_by'])),
-  );
+        date: _text(json['date']),
+        time: _text(json['time']),
+        rtaRating: _toDouble(json['rta_rating']),
+        rtaReview: _text(json['rta_review']),
+        otherRating: _toDouble(json['other_rating']),
+        otherReview: _text(json['other_review']),
+        average: _toDouble(json['avg_rating']),
+        ratedBy: RatedBy.fromJson(_asMap(json['rated_by'])),
+      );
 }
 
 class RatedBy {
@@ -329,10 +327,10 @@ class RatedBy {
   });
 
   factory RatedBy.fromJson(Map<String, dynamic> json) => RatedBy(
-    empId: _text(json['emp_id']),
-    name: _text(json['emp_name']),
-    designation: _text(json['emp_designation']),
-  );
+        empId: _text(json['emp_id']),
+        name: _text(json['emp_name']),
+        designation: _text(json['emp_designation']),
+      );
 }
 
 class WorkData {
@@ -357,15 +355,15 @@ class WorkData {
   });
 
   factory WorkData.fromJson(Map<String, dynamic> json) => WorkData(
-    total: _toInt(json['total']),
-    done: _toInt(json['done']),
-    pending: _toInt(json['pending']),
-    processing: _toInt(json['processing']),
-    doneRate: _toDouble(json['done_rate']) ?? 0,
-    activeDays: _toInt(json['active_days']),
-    tourDays: _toInt(json['tour_days']),
-    lastActivity: _text(json['last_activity']),
-  );
+        total: _toInt(json['total']),
+        done: _toInt(json['done']),
+        pending: _toInt(json['pending']),
+        processing: _toInt(json['processing']),
+        doneRate: _toDouble(json['done_rate']) ?? 0,
+        activeDays: _toInt(json['active_days']),
+        tourDays: _toInt(json['tour_days']),
+        lastActivity: _text(json['last_activity']),
+      );
 }
 
 class AgendaData {
@@ -382,14 +380,13 @@ class AgendaData {
   });
 
   factory AgendaData.fromJson(Map<String, dynamic> json) => AgendaData(
-    submitted:
-        json['submitted'] == true ||
-        _text(json['submitted']).toLowerCase() == 'true' ||
-        _text(json['submitted']) == '1',
-    total: _toInt(json['total']),
-    linkedTasks: _toInt(json['linked_tasks']),
-    linkRate: _toDouble(json['link_rate']) ?? 0,
-  );
+        submitted: json['submitted'] == true ||
+            _text(json['submitted']).toLowerCase() == 'true' ||
+            _text(json['submitted']) == '1',
+        total: _toInt(json['total']),
+        linkedTasks: _toInt(json['linked_tasks']),
+        linkRate: _toDouble(json['link_rate']) ?? 0,
+      );
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -402,11 +399,16 @@ class PerformanceApi {
     required String month,
     required String year,
   }) async {
-    final uri = Uri.parse(
-      '$_baseUrl/ratings',
-    ).replace(queryParameters: {'emp_id': empId, 'month': month, 'year': year});
+    final uri = Uri.parse('$_baseUrl/ratings').replace(
+      queryParameters: {
+        'emp_id': empId,
+        'month': month,
+        'year': year,
+      },
+    );
 
-    final response = await http.get(uri).timeout(const Duration(seconds: 30));
+    final response =
+        await http.get(uri).timeout(const Duration(seconds: 30));
 
     if (response.statusCode != 200) {
       throw Exception('Server error (${response.statusCode})');
@@ -561,8 +563,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
       final employee = item.employee;
       final rating = item.rating.summary;
 
-      final matchesSearch =
-          query.isEmpty ||
+      final matchesSearch = query.isEmpty ||
           employee.name.toLowerCase().contains(query) ||
           employee.empId.toLowerCase().contains(query) ||
           employee.designation.toLowerCase().contains(query) ||
@@ -577,13 +578,14 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
       };
 
       return matchesSearch && matchesStatus;
-    }).toList()..sort((a, b) {
-      final aRating = a.rating.summary.average ?? -1;
-      final bRating = b.rating.summary.average ?? -1;
+    }).toList()
+      ..sort((a, b) {
+        final aRating = a.rating.summary.average ?? -1;
+        final bRating = b.rating.summary.average ?? -1;
 
-      if (aRating != bRating) return bRating.compareTo(aRating);
-      return a.employee.name.compareTo(b.employee.name);
-    });
+        if (aRating != bRating) return bRating.compareTo(aRating);
+        return a.employee.name.compareTo(b.employee.name);
+      });
   }
 
   Future<void> _openRateDialog(EmployeePerformance employee) async {
@@ -704,7 +706,10 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
               const SizedBox(height: 2),
               const Text(
                 'Review activity, ratings, tours, agendas and employee feedback.',
-                style: TextStyle(fontSize: 11.5, color: AppColors.mute),
+                style: TextStyle(
+                  fontSize: 11.5,
+                  color: AppColors.mute,
+                ),
               ),
             ],
           ),
@@ -803,11 +808,15 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
               final yearField = DropdownButtonFormField<String>(
                 value: _selectedYear,
                 isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Year'),
+                decoration: const InputDecoration(
+                  labelText: 'Year',
+                ),
                 items: years
                     .map(
-                      (year) =>
-                          DropdownMenuItem(value: year, child: Text(year)),
+                      (year) => DropdownMenuItem(
+                        value: year,
+                        child: Text(year),
+                      ),
                     )
                     .toList(),
                 onChanged: _loading
@@ -822,10 +831,18 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
               final statusField = DropdownButtonFormField<String>(
                 value: _selectedStatus,
                 isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Rating status'),
+                decoration: const InputDecoration(
+                  labelText: 'Rating status',
+                ),
                 items: const [
-                  DropdownMenuItem(value: 'all', child: Text('All employees')),
-                  DropdownMenuItem(value: 'rated', child: Text('Rated')),
+                  DropdownMenuItem(
+                    value: 'all',
+                    child: Text('All employees'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'rated',
+                    child: Text('Rated'),
+                  ),
                   DropdownMenuItem(
                     value: 'not_rated',
                     child: Text('Not rated'),
@@ -908,7 +925,10 @@ class _SupervisorBanner extends StatelessWidget {
   final Supervisor supervisor;
   final PerformanceFilter filter;
 
-  const _SupervisorBanner({required this.supervisor, required this.filter});
+  const _SupervisorBanner({
+    required this.supervisor,
+    required this.filter,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -964,7 +984,10 @@ class _SupervisorBanner extends StatelessWidget {
                   supervisor.designation,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 10.5, color: Colors.white70),
+                  style: const TextStyle(
+                    fontSize: 10.5,
+                    color: Colors.white70,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Wrap(
@@ -1039,16 +1062,22 @@ class _SummarySection extends StatelessWidget {
         final columns = constraints.maxWidth >= 800
             ? 3
             : constraints.maxWidth >= 500
-            ? 3
-            : 2;
+                ? 3
+                : 2;
 
-        final width = (constraints.maxWidth - ((columns - 1) * 10)) / columns;
+        final width =
+            (constraints.maxWidth - ((columns - 1) * 10)) / columns;
 
         return Wrap(
           spacing: 10,
           runSpacing: 10,
           children: cards
-              .map((card) => SizedBox(width: width, child: card))
+              .map(
+                (card) => SizedBox(
+                  width: width,
+                  child: card,
+                ),
+              )
               .toList(),
         );
       },
@@ -1107,12 +1136,18 @@ class _SummaryCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             title,
-            style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 2),
           Text(
             subtitle,
-            style: const TextStyle(fontSize: 9.5, color: AppColors.mute),
+            style: const TextStyle(
+              fontSize: 9.5,
+              color: AppColors.mute,
+            ),
           ),
         ],
       ),
@@ -1128,7 +1163,10 @@ class _EmployeePerformanceCard extends StatefulWidget {
   final EmployeePerformance item;
   final VoidCallback onRate;
 
-  const _EmployeePerformanceCard({required this.item, required this.onRate});
+  const _EmployeePerformanceCard({
+    required this.item,
+    required this.onRate,
+  });
 
   @override
   State<_EmployeePerformanceCard> createState() =>
@@ -1261,7 +1299,12 @@ class _EmployeePerformanceCardState extends State<_EmployeePerformanceCard> {
                   spacing: 8,
                   runSpacing: 8,
                   children: cards
-                      .map((card) => SizedBox(width: width, child: card))
+                      .map(
+                        (card) => SizedBox(
+                          width: width,
+                          child: card,
+                        ),
+                      )
                       .toList(),
                 );
               },
@@ -1381,24 +1424,33 @@ class _RatingScore extends StatelessWidget {
       child: Column(
         children: [
           Icon(
-            summary.isRated ? Icons.star_rounded : Icons.star_outline_rounded,
+            summary.isRated
+                ? Icons.star_rounded
+                : Icons.star_outline_rounded,
             color: summary.isRated ? AppColors.amber : AppColors.mute,
             size: 19,
           ),
           const SizedBox(height: 2),
           Text(
-            summary.average == null ? '—' : summary.average!.toStringAsFixed(1),
+            summary.average == null
+                ? '—'
+                : summary.average!.toStringAsFixed(1),
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w800,
-              color: summary.isRated ? AppColors.forestDeep : AppColors.mute,
+              color: summary.isRated
+                  ? AppColors.forestDeep
+                  : AppColors.mute,
             ),
           ),
           Text(
             summary.isRated
                 ? '${summary.totalReview} review${summary.totalReview == 1 ? '' : 's'}'
                 : 'Not rated',
-            style: const TextStyle(fontSize: 8.5, color: AppColors.mute),
+            style: const TextStyle(
+              fontSize: 8.5,
+              color: AppColors.mute,
+            ),
           ),
         ],
       ),
@@ -1464,7 +1516,10 @@ class _PerformanceMetric extends StatelessWidget {
                   subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 8.5, color: AppColors.mute),
+                  style: const TextStyle(
+                    fontSize: 8.5,
+                    color: AppColors.mute,
+                  ),
                 ),
               ],
             ),
@@ -1492,19 +1547,31 @@ class _RatingBreakdown extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: _RatingValue(label: 'RTA', value: summary.averageRta),
+            child: _RatingValue(
+              label: 'RTA',
+              value: summary.averageRta,
+            ),
           ),
           const _VerticalLine(),
           Expanded(
-            child: _RatingValue(label: 'Other', value: summary.averageOther),
+            child: _RatingValue(
+              label: 'Other',
+              value: summary.averageOther,
+            ),
           ),
           const _VerticalLine(),
           Expanded(
-            child: _RatingValue(label: 'Highest', value: summary.highest),
+            child: _RatingValue(
+              label: 'Highest',
+              value: summary.highest,
+            ),
           ),
           const _VerticalLine(),
           Expanded(
-            child: _RatingValue(label: 'Lowest', value: summary.lowest),
+            child: _RatingValue(
+              label: 'Lowest',
+              value: summary.lowest,
+            ),
           ),
         ],
       ),
@@ -1516,7 +1583,10 @@ class _RatingValue extends StatelessWidget {
   final String label;
   final double? value;
 
-  const _RatingValue({required this.label, required this.value});
+  const _RatingValue({
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1533,7 +1603,10 @@ class _RatingValue extends StatelessWidget {
         const SizedBox(height: 1),
         Text(
           label,
-          style: const TextStyle(fontSize: 8.5, color: AppColors.mute),
+          style: const TextStyle(
+            fontSize: 8.5,
+            color: AppColors.mute,
+          ),
         ),
       ],
     );
@@ -1545,7 +1618,11 @@ class _VerticalLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(width: 1, height: 27, color: AppColors.border);
+    return Container(
+      width: 1,
+      height: 27,
+      color: AppColors.border,
+    );
   }
 }
 
@@ -1619,7 +1696,10 @@ class _ReviewCard extends StatelessWidget {
           const SizedBox(height: 3),
           Text(
             '${review.date}${review.time.isEmpty ? '' : ' • ${review.time}'}',
-            style: const TextStyle(fontSize: 9, color: AppColors.mute),
+            style: const TextStyle(
+              fontSize: 9,
+              color: AppColors.mute,
+            ),
           ),
           const SizedBox(height: 10),
           _ReviewLine(
@@ -1671,14 +1751,20 @@ class _ReviewLine extends StatelessWidget {
           const SizedBox(width: 3),
           Text(
             rating!.toStringAsFixed(1),
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(width: 8),
         ],
         Expanded(
           child: Text(
             review.isEmpty ? 'No review provided' : review,
-            style: const TextStyle(fontSize: 10, color: AppColors.mute),
+            style: const TextStyle(
+              fontSize: 10,
+              color: AppColors.mute,
+            ),
           ),
         ),
       ],
@@ -1755,7 +1841,9 @@ class _RatingDialogState extends State<_RatingDialog> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(error.toString().replaceFirst('Exception: ', '')),
+          content: Text(
+            error.toString().replaceFirst('Exception: ', ''),
+          ),
           backgroundColor: AppColors.destructive,
         ),
       );
@@ -1769,7 +1857,9 @@ class _RatingDialogState extends State<_RatingDialog> {
     return Dialog(
       backgroundColor: AppColors.bg,
       insetPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(21)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(21),
+      ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 460),
         child: SingleChildScrollView(
@@ -1782,7 +1872,9 @@ class _RatingDialogState extends State<_RatingDialog> {
                   gradient: LinearGradient(
                     colors: [AppColors.forestDeep, AppColors.forest],
                   ),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(21)),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(21),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -1892,7 +1984,9 @@ class _RatingDialogState extends State<_RatingDialog> {
                                 ),
                               )
                             : const Icon(Icons.save_rounded, size: 18),
-                        label: Text(_saving ? 'Saving...' : 'Submit Rating'),
+                        label: Text(
+                          _saving ? 'Saving...' : 'Submit Rating',
+                        ),
                       ),
                     ),
                   ],
@@ -1940,7 +2034,9 @@ class _StarInput extends StatelessWidget {
                 ),
               ),
               Text(
-                value == 0 ? '—' : '${value.toStringAsFixed(0)}/$_maxRating',
+                value == 0
+                    ? '—'
+                    : '${value.toStringAsFixed(0)}/$_maxRating',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
@@ -2042,7 +2138,10 @@ class _LoadingState extends StatelessWidget {
           SizedBox(height: 12),
           Text(
             'Loading employee performance...',
-            style: TextStyle(fontSize: 11.5, color: AppColors.mute),
+            style: TextStyle(
+              fontSize: 11.5,
+              color: AppColors.mute,
+            ),
           ),
         ],
       ),
@@ -2054,7 +2153,10 @@ class _ErrorState extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
 
-  const _ErrorState({required this.message, required this.onRetry});
+  const _ErrorState({
+    required this.message,
+    required this.onRetry,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -2067,12 +2169,19 @@ class _ErrorState extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Icon(Icons.cloud_off_rounded, size: 31, color: AppColors.mute),
+          const Icon(
+            Icons.cloud_off_rounded,
+            size: 31,
+            color: AppColors.mute,
+          ),
           const SizedBox(height: 9),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 11.5, color: AppColors.mute),
+            style: const TextStyle(
+              fontSize: 11.5,
+              color: AppColors.mute,
+            ),
           ),
           const SizedBox(height: 13),
           OutlinedButton.icon(
@@ -2090,7 +2199,10 @@ class _EmptyState extends StatelessWidget {
   final String title;
   final String message;
 
-  const _EmptyState({required this.title, required this.message});
+  const _EmptyState({
+    required this.title,
+    required this.message,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -2111,13 +2223,19 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 9),
           Text(
             title,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 10.5, color: AppColors.mute),
+            style: const TextStyle(
+              fontSize: 10.5,
+              color: AppColors.mute,
+            ),
           ),
         ],
       ),

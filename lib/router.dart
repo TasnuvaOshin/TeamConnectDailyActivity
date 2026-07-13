@@ -19,7 +19,8 @@ import 'widgets/app_shell.dart';
 final routerProvider = Provider<GoRouter>((ref) {
   // Rebuilds the router (and re-runs redirects) whenever auth state flips.
   final signedIn = ref.watch(
-      sessionControllerProvider.select((session) => session != null));
+    sessionControllerProvider.select((session) => session != null),
+  );
 
   return GoRouter(
     initialLocation: signedIn ? '/dashboard' : '/auth',
@@ -35,10 +36,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, __, child) => AppShell(child: child),
         routes: [
           GoRoute(
-              path: '/dashboard', builder: (_, __) => const DashboardScreen()),
+            path: '/dashboard',
+            builder: (_, __) => const DashboardScreen(),
+          ),
           GoRoute(
-              path: '/activities',
-              builder: (_, __) => const ActivitiesScreen()),
+            path: '/activities',
+            builder: (_, __) => const ActivitiesScreen(),
+          ),
           GoRoute(path: '/tasks', builder: (_, __) => const TasksScreen()),
           GoRoute(
             path: '/team',
@@ -51,11 +55,14 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          GoRoute(path: '/reports', builder: (_, __) => const ReportsScreen()),
+          GoRoute(path: '/reports', builder: (_, __) => const RatingsScreen()),
           GoRoute(path: '/growth', builder: (_, __) => const GrowthScreen()),
           GoRoute(path: '/admin', builder: (_, __) => const AdminScreen()),
           GoRoute(path: '/agenda', builder: (_, __) => const AgendaScreen()),
-          GoRoute(path: '/tour-plan', builder: (_, __) => const TourPlanScreen()),
+          GoRoute(
+            path: '/tour-plan',
+            builder: (_, __) => const TourPlanScreen(),
+          ),
           GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
         ],
       ),

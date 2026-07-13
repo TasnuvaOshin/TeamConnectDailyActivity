@@ -1,8 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:team_connect/api/session.dart';
 
 import '../providers/auth_provider.dart';
 import '../theme.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+/// Plain, provider-free login. Returns the signed-in user or throws.
+class LoginApi {
+  static const _url = 'https://dailyactivityapi.acipanel.com/login';
+
+  static Future<Session> signIn(String empId, String password) async {
+    final uri = Uri.parse(
+      _url,
+    ).replace(queryParameters: {'emp_id': empId, 'password': password});
+
+    final r = await http.get(uri).timeout(const Duration(seconds: 20));
+    if (r.statusCode != 200) {
+      throw Exception('Server error (${r.statusCode})');
+    }
+
+    final body = jsonDecode(r.body) as Map<String, dynamic>;
+    final rows = (body['data'] as List?) ?? const [];
+    if ('${body['response']}' != '200' || rows.isEmpty) {
+      throw Exception('Invalid staff ID or password');
+    }
+
+    final j = rows.first as Map<String, dynamic>;
+    String s(dynamic v) => (v ?? '').toString().trim();
+    bool b(dynamic v) => v == true || v == 1 || v == '1' || v == 'true';
+
+    if (s(j['acc_status']) != '1') {
+      throw Exception('Account not active. Contact your supervisor.');
+    }
+
+    return Session(
+      userId: s(j['emp_id']),
+      empId: s(j['emp_id']),
+      name: s(j['emp_name']),
+      designation: s(j['emp_designation']),
+      location: s(j['location']), // "HO"
+      team: s(j['team']), // "HQ Team" — straight from API
+      portfolio: s(j['portfolio']), // "Foton"
+      supId: s(j['sup_id']),
+      isSupervisor: b(j['is_supervisor']), // false → normal user
+    );
+  }
+}
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -13,7 +59,7 @@ class AuthScreen extends ConsumerStatefulWidget {
 class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _staffId = TextEditingController();
   final _password = TextEditingController();
-  
+
   // Registration fields
   final _regUserId = TextEditingController();
   final _regName = TextEditingController();
@@ -21,10 +67,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _regSupId = TextEditingController();
   final _regPassword = TextEditingController();
   final _regConfirmPassword = TextEditingController();
-  
+
   String? _selectedTeam = 'Marketing Team';
   String? _selectedDesignation;
-  
+
   bool _isRegistering = false;
   bool _loading = false;
 
@@ -75,32 +121,26 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   };
 
   Future<void> _signIn() async {
-    if (_staffId.text.trim().isEmpty || _password.text.isEmpty) return;
+    final empId = _staffId.text.trim();
+    final pass = _password.text;
+    if (empId.isEmpty || pass.isEmpty) return;
+
     setState(() => _loading = true);
     try {
-      await ref
-          .read(sessionControllerProvider.notifier)
-          .login(_staffId.text.trim(), _password.text);
-          
-      // Auto-register push key (update/notification.php)
-      final session = ref.read(sessionControllerProvider);
-      if (session != null && !session.isDemo) {
-        try {
-          await ref.read(apiServiceProvider).registerNotification(
-                session.userId,
-                'mock-fcm-token-${session.userId}',
-              );
-        } catch (_) {
-          // Non-fatal background registration error
-        }
-      }
-      // Router redirect takes over → /dashboard.
+      final session = await LoginApi.signIn(empId, pass);
+
+      // saves to disk AND flips in-memory state → router guard sees it
+      await ref.read(sessionControllerProvider.notifier).updateSession(session);
+
+      // no context.go() needed — the redirect guard takes over
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(e.toString().replaceFirst('Exception: ', '')),
-          backgroundColor: AppColors.destructive,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
+            backgroundColor: AppColors.destructive,
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -116,22 +156,28 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         _regSupId.text.trim().isEmpty ||
         _regPassword.text.isEmpty ||
         _regConfirmPassword.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Please fill all fields'),
-        backgroundColor: AppColors.destructive,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill all fields'),
+          backgroundColor: AppColors.destructive,
+        ),
+      );
       return;
     }
     if (_regPassword.text != _regConfirmPassword.text) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Passwords do not match'),
-        backgroundColor: AppColors.destructive,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Passwords do not match'),
+          backgroundColor: AppColors.destructive,
+        ),
+      );
       return;
     }
     setState(() => _loading = true);
     try {
-      final res = await ref.read(apiServiceProvider).register(
+      final res = await ref
+          .read(apiServiceProvider)
+          .register(
             staffId: _regUserId.text.trim(),
             name: _regName.text.trim(),
             designation: _selectedDesignation!,
@@ -144,10 +190,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         throw Exception(res.data ?? 'Registration failed');
       }
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Registration successful! Please sign in.'),
-          backgroundColor: AppColors.forest,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registration successful! Please sign in.'),
+            backgroundColor: AppColors.forest,
+          ),
+        );
         setState(() {
           _isRegistering = false;
           _staffId.text = _regUserId.text.trim();
@@ -155,10 +203,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(e.toString().replaceFirst('Exception: ', '')),
-          backgroundColor: AppColors.destructive,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
+            backgroundColor: AppColors.destructive,
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -186,7 +236,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                  maxWidth: wide ? 1000 : 440, minHeight: wide ? (_isRegistering ? 700 : 450) : 0),
+                maxWidth: wide ? 1000 : 440,
+                minHeight: wide ? (_isRegistering ? 700 : 450) : 0,
+              ),
               child: wide
                   ? IntrinsicHeight(
                       child: Row(
@@ -213,7 +265,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: _isRegistering ? _buildRegisterFields() : _buildLoginFields(),
+          children: _isRegistering
+              ? _buildRegisterFields()
+              : _buildLoginFields(),
         ),
       ),
     );
@@ -223,8 +277,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     return [
       Text('Sign in', style: display(size: 24, weight: FontWeight.w800)),
       const SizedBox(height: 4),
-      const Text('Use your credentials.',
-          style: TextStyle(color: AppColors.mute, fontSize: 13)),
+      const Text(
+        'Use your credentials.',
+        style: TextStyle(color: AppColors.mute, fontSize: 13),
+      ),
       const SizedBox(height: 22),
       const _FieldLabel('User ID'),
       TextField(
@@ -248,7 +304,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
-                    strokeWidth: 2, color: Colors.white))
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
             : const Text('Sign in'),
       ),
       const SizedBox(height: 16),
@@ -266,10 +325,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     return [
       Text('Register', style: display(size: 24, weight: FontWeight.w800)),
       const SizedBox(height: 4),
-      const Text('Create your Team Connect account.',
-          style: TextStyle(color: AppColors.mute, fontSize: 13)),
+      const Text(
+        'Create your Team Connect account.',
+        style: TextStyle(color: AppColors.mute, fontSize: 13),
+      ),
       const SizedBox(height: 16),
-      
+
       const _FieldLabel('Employee-ID'),
       TextField(
         controller: _regUserId,
@@ -277,7 +338,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         decoration: const InputDecoration(hintText: 'e.g. 123456'),
       ),
       const SizedBox(height: 10),
-      
+
       const _FieldLabel('Supervisor-ID'),
       TextField(
         controller: _regSupId,
@@ -285,7 +346,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         decoration: const InputDecoration(hintText: 'e.g. 12345'),
       ),
       const SizedBox(height: 10),
-      
+
       const _FieldLabel('Your Name'),
       TextField(
         controller: _regName,
@@ -293,14 +354,25 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         decoration: const InputDecoration(hintText: 'e.g. Sifat Rahman'),
       ),
       const SizedBox(height: 10),
-      
+
       const _FieldLabel('Select Team'),
       DropdownButtonFormField<String>(
         value: _selectedTeam,
         isExpanded: true,
-        decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+        decoration: const InputDecoration(
+          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
         items: _designationsByTeam.keys
-            .map((t) => DropdownMenuItem(value: t, child: Text(t, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis)))
+            .map(
+              (t) => DropdownMenuItem(
+                value: t,
+                child: Text(
+                  t,
+                  style: const TextStyle(fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            )
             .toList(),
         onChanged: (v) {
           setState(() {
@@ -310,27 +382,38 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         },
       ),
       const SizedBox(height: 10),
-      
+
       const _FieldLabel('Your Designation'),
       DropdownButtonFormField<String>(
         value: _selectedDesignation,
         isExpanded: true,
-        decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+        decoration: const InputDecoration(
+          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
         hint: const Text('Select Designation', style: TextStyle(fontSize: 13)),
         items: designationsList
-            .map((d) => DropdownMenuItem(value: d, child: Text(d, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis)))
+            .map(
+              (d) => DropdownMenuItem(
+                value: d,
+                child: Text(
+                  d,
+                  style: const TextStyle(fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            )
             .toList(),
         onChanged: (v) => setState(() => _selectedDesignation = v),
       ),
       const SizedBox(height: 10),
-      
+
       const _FieldLabel('Portfolio Name'),
       TextField(
         controller: _regPortfolio,
         decoration: const InputDecoration(hintText: 'e.g. Tractor'),
       ),
       const SizedBox(height: 10),
-      
+
       const _FieldLabel('Password'),
       TextField(
         controller: _regPassword,
@@ -338,7 +421,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         decoration: const InputDecoration(hintText: '••••••'),
       ),
       const SizedBox(height: 10),
-      
+
       const _FieldLabel('Confirm Password'),
       TextField(
         controller: _regConfirmPassword,
@@ -346,7 +429,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         decoration: const InputDecoration(hintText: '••••••'),
       ),
       const SizedBox(height: 16),
-      
+
       ElevatedButton(
         onPressed: _loading ? null : _register,
         child: _loading
@@ -354,7 +437,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
-                    strokeWidth: 2, color: Colors.white))
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
             : const Text('Register'),
       ),
       const SizedBox(height: 12),
@@ -384,42 +470,54 @@ class _BrandPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.amber,
-                borderRadius: BorderRadius.circular(12),
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.amber,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.directions_car,
+                  color: Colors.white,
+                  size: 24,
+                ),
               ),
-              child: const Icon(Icons.directions_car,
-                  color: Colors.white, size: 24),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Team Connect',
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Daily Activity',
                     style: display(
-                        size: 20,
-                        weight: FontWeight.w800,
-                        color: Colors.white)),
-                Text('ACI MOTORS • MARKETING',
+                      size: 20,
+                      weight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    'ACI MOTORS • MARKETING',
                     style: TextStyle(
-                        fontSize: 10,
-                        letterSpacing: 2,
-                        color: Colors.white.withAlpha(179))),
-              ],
-            ),
-          ]),
+                      fontSize: 10,
+                      letterSpacing: 2,
+                      color: Colors.white.withAlpha(179),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
           const SizedBox(height: 32),
           RichText(
             text: TextSpan(
               style: display(
-                  size: 30,
-                  weight: FontWeight.w800,
-                  color: Colors.white,
-                  height: 1.25),
+                size: 30,
+                weight: FontWeight.w800,
+                color: Colors.white,
+                height: 1.25,
+              ),
               children: const [
                 TextSpan(text: 'Daily activity, tasks and performance '),
                 TextSpan(
@@ -433,12 +531,16 @@ class _BrandPanel extends StatelessWidget {
           Text(
             'One command center for the entire marketing chain.',
             style: TextStyle(
-                color: Colors.white.withAlpha(204), fontSize: 14, height: 1.5),
+              color: Colors.white.withAlpha(204),
+              fontSize: 14,
+              height: 1.5,
+            ),
           ),
           const Spacer(),
-          Text('© ${DateTime.now().year} ACI Motors Ltd.',
-              style: TextStyle(
-                  color: Colors.white.withAlpha(153), fontSize: 11)),
+          Text(
+            '© ${DateTime.now().year} ACI Motors Ltd.',
+            style: TextStyle(color: Colors.white.withAlpha(153), fontSize: 11),
+          ),
         ],
       ),
     );
@@ -450,11 +552,14 @@ class _FieldLabel extends StatelessWidget {
   const _FieldLabel(this.text);
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 6),
-        child: Text(text,
-            style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.text)),
-      );
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: AppColors.text,
+      ),
+    ),
+  );
 }
